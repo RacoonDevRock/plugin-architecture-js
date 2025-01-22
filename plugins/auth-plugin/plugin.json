@@ -1,6 +1,5 @@
 {
-    "name": "Auth Plugin",
-    "version": "1.0.0",
-    "description": "Provee rutas de autenticación"
-  }
-  
+  "name": "auth-plugin",
+  "version": "1.0.0",
+  "description": "Provee autenticación básica"
+}

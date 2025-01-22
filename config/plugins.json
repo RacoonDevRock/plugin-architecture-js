@@ -1,3 +1,16 @@
 {
-  "enabledPlugins": ["auth-plugin"]
+  "enabledPlugins": {
+    "auth-plugin": {
+      "enabled": true,
+      "config": {
+        "tokenExpiration": 3600
+      }
+    },
+    "ticket-plugin": {
+      "enabled": true,
+      "config": {
+        "maxTicketsPerUser": 10
+      }
+    }
+  }
 }

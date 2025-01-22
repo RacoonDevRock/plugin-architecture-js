@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
+import { validatePlugin } from "./plugin-contract.js";
+import { createPluginContext } from "./context/auth-plugin-context.js"; // Ajusta según tu contexto
 
-export default async function loadPlugins(pluginsPath) {
+export default async function loadPlugins(pluginsPath, pluginConfig, globalContext) {
   const plugins = [];
   const pluginFolders = fs.readdirSync(pluginsPath);
 
@@ -15,10 +17,21 @@ export default async function loadPlugins(pluginsPath) {
       const config = JSON.parse(fs.readFileSync(pluginConfigPath, "utf-8"));
       const module = await import(pathToFileURL(pluginIndexPath).href);
 
-      if (typeof module.init === "function") {
-        plugins.push({ ...config, init: module.init });
-      } else {
-        console.warn(`El plug-in en ${folder} no tiene un método init.`);
+      // Validar el contrato del plug-in
+      try {
+        validatePlugin(module, config);
+
+        // Verificar si está habilitado en la configuración global
+        if (pluginConfig.enabledPlugins[config.name]?.enabled) {
+          const specificConfig = pluginConfig.enabledPlugins[config.name].config || {};
+          const context = createPluginContext(config.name, globalContext); // Crear contexto específico
+
+          plugins.push({ ...config, init: module.init, config: specificConfig, context });
+        } else {
+          console.log(`El plug-in "${config.name}" está deshabilitado.`);
+        }
+      } catch (error) {
+        console.error(`Error en el plug-in "${folder}": ${error.message}`);
       }
     }
   }

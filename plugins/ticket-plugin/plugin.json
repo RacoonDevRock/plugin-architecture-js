@@ -1,5 +1,5 @@
 {
-  "name": "Ticket Plugin",
+  "name": "ticket-plugin",
   "version": "1.0.0",
-  "description": "Maneja la creación y listado de tickets"
+  "description": "Gestión básica de tickets"
 }
