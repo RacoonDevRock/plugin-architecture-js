@@ -5,6 +5,10 @@ import loadPlugins from "./plugin-loader.js";
 import { createGlobalContext } from "./plugin-global.js";
 import pluginConfig from "../config/plugins.json" assert { type: "json" };
 
+// Swagger api
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "../docs/swagger.json" assert { type: "json" };
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -12,6 +16,7 @@ const app = express();
 const PORT = 3000; // Cambia el puerto según tu necesidad
 
 app.use(express.json());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 (async () => {
   try {

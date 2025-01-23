@@ -1,14 +1,8 @@
 export function createGlobalContext() {
   return {
-    log: (message) => console.log(`[LOG]: ${message}`), // Servicio de logs
+    log: (message) => console.log(`[LOG]: ${message}`),
     database: {
-      query: async (sql) => {
-        console.log(`[DB]: Ejecutando SQL: ${sql}`);
-        return []; // Simulación de consulta
-      },
-    },
-    userService: {
-      getUserById: (id) => ({ id, username: "mockUser" }), // Simulación de un servicio de usuarios
+      tickets: [], // Simulación de almacenamiento en memoria para tickets
     },
   };
 }
