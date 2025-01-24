@@ -1,7 +1,8 @@
-const admin = require("firebase-admin");
-require("dotenv").config();
+import admin from "firebase-admin";
+import dotenv from "dotenv";
 
-// Initializing Firebase Admin SDK
+dotenv.config();
+
 admin.initializeApp({
     credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
@@ -10,8 +11,6 @@ admin.initializeApp({
     }),
 });
 
-// Initialize Firestore
 const db = admin.firestore();
 
-// Export Firestore to use in other files
-module.exports = db;
+export default db;

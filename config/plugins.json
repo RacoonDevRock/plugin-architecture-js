@@ -11,6 +11,7 @@
       "config": {
         "maxTicketsPerUser": 10
       }
-    }
+    },
+    "bonus-plugin": {"enabled": true}
   }
 }
