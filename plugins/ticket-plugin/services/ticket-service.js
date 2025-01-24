@@ -1,40 +1,51 @@
-import { Ticket } from "../models/ticket.js";
-
-export function createTicketService(context) {
-  const ticketsDB = context.database.tickets; // Array simulado en memoria
+export function createTicketService(context, userService) {
+  const ticketsDB = context.database.tickets;
 
   return {
     async createTicket(data) {
-      // Crear un nuevo objeto Ticket
-      const newTicket = new Ticket(data);
-      ticketsDB.push({ id: Date.now(), ...newTicket }); // Generar ID único basado en tiempo
-      return newTicket;
+      if (!userService) {
+        throw new Error("El servicio de usuario no está disponible.");
+      }
+
+      const user = await userService.getUserById(data.userId);
+      if (!user) {
+        throw new Error(`Usuario con ID ${data.userId} no encontrado.`);
+      }
+
+      const ticket = {
+        id: Date.now(),
+        title: data.title,
+        description: data.description,
+        userId: data.userId,
+        status: "open",
+        created_at: new Date(),
+      };
+
+      ticketsDB.push(ticket);
+      return ticket;
     },
 
     async getAllTickets() {
-      return ticketsDB; // Devuelve todos los tickets
+      return ticketsDB;
     },
 
     async getTicketById(id) {
-      const ticket = ticketsDB.find((t) => t.id === id);
-      return ticket || null; // Devuelve el ticket o null si no existe
+      return ticketsDB.find((t) => t.id === id) || null;
     },
 
     async updateTicket(id, data) {
       const ticketIndex = ticketsDB.findIndex((t) => t.id === id);
 
       if (ticketIndex === -1) {
-        return null; // Si no se encuentra, retorna null
+        return null;
       }
 
       const existingTicket = ticketsDB[ticketIndex];
 
-      // Validar el estado si se está actualizando
       if (data.status) {
         Ticket.validateStatus(data.status);
       }
 
-      // Actualizar el ticket existente
       const updatedTicket = {
         ...existingTicket,
         ...data,
@@ -49,10 +60,10 @@ export function createTicketService(context) {
       const ticketIndex = ticketsDB.findIndex((t) => t.id === id);
 
       if (ticketIndex === -1) {
-        return false; // Si no se encuentra, retorna false
+        return false;
       }
 
-      ticketsDB.splice(ticketIndex, 1); // Elimina el ticket
+      ticketsDB.splice(ticketIndex, 1);
       return true;
     },
   };

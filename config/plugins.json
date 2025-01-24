@@ -10,7 +10,8 @@
       "enabled": true,
       "config": {
         "maxTicketsPerUser": 10
-      }
+      },
+      "dependencies": ["auth-plugin"]
     }
   }
 }

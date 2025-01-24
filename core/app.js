@@ -23,11 +23,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     // Crear el contexto global para los plug-ins
     const globalContext = createGlobalContext();
 
-    // Ruta para probar el backend
-    app.get("/", (req, res) => {
-      res.send("¡Bienvenido al sistema basado en plug-ins!");
-    });
-
     // Cargar los plug-ins habilitados desde el configurador
     const pluginsPath = path.join(__dirname, "../plugins");
     const plugins = await loadPlugins(pluginsPath, pluginConfig, globalContext);
@@ -43,7 +38,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Error al iniciar el sistema:", error.message);
+    console.error("Error al iniciar el sistema:", error);
     process.exit(1); // Termina la ejecución si algo falla
   }
 })();

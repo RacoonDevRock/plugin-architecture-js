@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
 import { validatePlugin } from "./plugin-contract.js";
-import { createPluginContext } from "./context/auth-plugin-context.js"; // Ajusta según tu contexto
 
 export default async function loadPlugins(pluginsPath, pluginConfig, globalContext) {
   const plugins = [];
@@ -24,9 +23,13 @@ export default async function loadPlugins(pluginsPath, pluginConfig, globalConte
         // Verificar si está habilitado en la configuración global
         if (pluginConfig.enabledPlugins[config.name]?.enabled) {
           const specificConfig = pluginConfig.enabledPlugins[config.name].config || {};
-          const context = createPluginContext(config.name, globalContext); // Crear contexto específico
 
-          plugins.push({ ...config, init: module.init, config: specificConfig, context });
+          plugins.push({
+            ...config,
+            init: module.init,
+            config: specificConfig,
+            context: globalContext, // Pasamos el contexto global directamente
+          });
         } else {
           console.log(`El plug-in "${config.name}" está deshabilitado.`);
         }
