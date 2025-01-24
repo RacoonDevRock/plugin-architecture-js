@@ -24,15 +24,43 @@ export function createUserService(context) {
         },
 
         async login(data) {
-            const userRef = usersCollection.doc(data.username);
-            const userSnap = await userRef.get();
-
-            if (!userSnap.exists || userSnap.data().password !== data.password) {
-                throw new Error("Credenciales incorrectas.");
+            if (!data.username || !data.password) {
+                throw new Error("El nombre de usuario y la contraseña son obligatorios.");
             }
 
-            const token = jwt.sign({ id: userRef.id }, secretKey, { expiresIn: "1h" });
-            return token;
+            try {
+                // Realizar consulta en Firestore para buscar por el campo username
+                const querySnapshot = await usersCollection
+                    .where("username", "==", data.username.trim())
+                    .get();
+
+                // Verificar si se encontró el usuario
+                if (querySnapshot.empty) {
+                    throw new Error("Credenciales incorrectas."); // Usuario no encontrado
+                }
+
+                // Obtener el primer documento (en caso de múltiples resultados, lo cual no debería pasar)
+                const userSnap = querySnapshot.docs[0];
+                const userData = userSnap.data();
+
+                // Comparar contraseñas
+                if (userData.password !== data.password.trim()) {
+                    throw new Error("Credenciales incorrectas."); // Contraseña incorrecta
+                }
+
+                // Generar token JWT
+                const token = jwt.sign(
+                    { id: userSnap.id, role: userData.role }, // Incluye el rol y el ID en el payload
+                    secretKey,
+                    { expiresIn: "1h" }
+                );
+
+                console.log(`Inicio de sesión exitoso para: ${data.username}`);
+                return token;
+            } catch (error) {
+                console.error("Error durante el inicio de sesión:", error.message);
+                throw new Error("Credenciales incorrectas.");
+            }
         },
 
         async getUserById(userId) {
