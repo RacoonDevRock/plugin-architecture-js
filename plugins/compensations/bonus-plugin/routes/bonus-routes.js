@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticateToken } from "../../../core/middleware/authenticateToken.js";
+import { authenticateToken } from "../../../../core/middleware/authenticateToken.js";
 import { bonusController } from "../controllers/bonus-controller.js";
 
 export function bonusRoutes(context) {

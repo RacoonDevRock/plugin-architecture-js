@@ -2,13 +2,16 @@ export const ticketController = {
   createTicket: (context) => async (req, res) => {
     try {
       const { title, description } = req.body;
+      const userId = req.user.id; // Obtenemos el ID del usuario autenticado
+
       const ticket = await context.ticketService.createTicket({
         title,
         description,
+        userId,
       });
       res.status(201).json({ message: "Ticket creado", ticket });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
   },
 

@@ -1,58 +1,57 @@
-import { Ticket } from "../models/ticket.js";
+import db from "../../../config/firestore.js";
 
-export function createTicketService(context) {
-  const ticketsDB = context.database.tickets; // Array simulado en memoria
+export function createTicketService(context, userService) {
+  const ticketsCollection = db.collection("Tickets");
 
   return {
     async createTicket(data) {
-      // Crear un nuevo objeto Ticket
-      const newTicket = new Ticket(data);
-      ticketsDB.push({ id: Date.now(), ...newTicket }); // Generar ID único basado en tiempo
-      return newTicket;
+      const user = await userService.getUserById(data.userId);
+      if (!user) {
+        throw new Error(`Usuario con ID ${data.userId} no encontrado.`);
+      }
+
+      const newTicket = {
+        ...data,
+        status: "open",
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      const docRef = await ticketsCollection.add(newTicket);
+      return { id: docRef.id, ...newTicket };
     },
 
     async getAllTickets() {
-      return ticketsDB; // Devuelve todos los tickets
+      const snapshot = await ticketsCollection.get();
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     },
 
     async getTicketById(id) {
-      const ticket = ticketsDB.find((t) => t.id === id);
-      return ticket || null; // Devuelve el ticket o null si no existe
+      const doc = await ticketsCollection.doc(id).get();
+      return doc.exists ? { id: doc.id, ...doc.data() } : null;
     },
 
     async updateTicket(id, data) {
-      const ticketIndex = ticketsDB.findIndex((t) => t.id === id);
+      const docRef = ticketsCollection.doc(id);
+      const existingDoc = await docRef.get();
+      if (!existingDoc.exists) return null;
 
-      if (ticketIndex === -1) {
-        return null; // Si no se encuentra, retorna null
-      }
-
-      const existingTicket = ticketsDB[ticketIndex];
-
-      // Validar el estado si se está actualizando
-      if (data.status) {
-        Ticket.validateStatus(data.status);
-      }
-
-      // Actualizar el ticket existente
-      const updatedTicket = {
-        ...existingTicket,
+      const updatedData = {
+        ...existingDoc.data(),
         ...data,
         updated_at: new Date(),
       };
 
-      ticketsDB[ticketIndex] = updatedTicket;
-      return updatedTicket;
+      await docRef.update(updatedData);
+      return { id: docRef.id, ...updatedData };
     },
 
     async deleteTicket(id) {
-      const ticketIndex = ticketsDB.findIndex((t) => t.id === id);
+      const docRef = ticketsCollection.doc(id);
+      const existingDoc = await docRef.get();
+      if (!existingDoc.exists) return false;
 
-      if (ticketIndex === -1) {
-        return false; // Si no se encuentra, retorna false
-      }
-
-      ticketsDB.splice(ticketIndex, 1); // Elimina el ticket
+      await docRef.delete();
       return true;
     },
   };
